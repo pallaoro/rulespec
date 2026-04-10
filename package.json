@@ -15,8 +15,7 @@
     "rulespec": "./dist/cli.js"
   },
   "files": [
-    "dist",
-    "skill"
+    "dist"
   ],
   "scripts": {
     "build": "tsc",
