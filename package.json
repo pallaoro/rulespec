@@ -1,6 +1,6 @@
 {
   "name": "rulespec",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Business rules as structured data, compiled into LLM-ready markdown prompts",
   "type": "module",
   "main": "./dist/index.js",
@@ -24,13 +24,18 @@
     "prepublishOnly": "npm run build && npm test"
   },
   "keywords": [
-    "rules",
-    "llm",
-    "prompt",
-    "ai",
     "business-rules",
+    "llm",
+    "ai-agents",
+    "prompt-engineering",
+    "guardrails",
+    "compliance",
+    "policy",
+    "rules-engine",
+    "agent-skills",
+    "skill-md",
     "yaml",
-    "markdown"
+    "cli"
   ],
   "license": "MIT",
   "author": "pallaoro",

@@ -1,10 +1,40 @@
 # rulespec
 
-*Once upon a time, business rules lived in the heads of domain experts. Then they were written in Word documents no one read. Then they were copy-pasted into LLM prompts by engineers who half-understood them, broke when anyone iterated, and drifted from reality within weeks. One day someone said: what if business rules were data, and prompts were compiled, not written? This repo is that idea. -@pallaoro, March 2026*
+Business rules as structured data. Compiles into LLM-ready prompts and agent-loadable SKILL.md files.
 
-The idea: business rules change constantly. Prompts shouldn't be hand-edited every time a policy updates. **rulespec** is a standard format for expressing business rules as structured data, and a compiler that turns them into LLM-ready prompts — or RULES.md files that AI agents load directly.
+[![npm](https://img.shields.io/npm/v/rulespec)](https://www.npmjs.com/package/rulespec)
+[![license](https://img.shields.io/npm/l/rulespec)](LICENSE)
 
-You change the rule, recompile, and only that prompt changes. Everything else stays untouched. The rules are owned by business people. The prompt strategy is owned by engineers. They version independently.
+*Business rules change constantly. Prompts shouldn't be hand-edited every time a policy updates. rulespec is a standard format for expressing business rules as structured data, and a compiler that turns them into LLM-ready prompts — or SKILL.md files that AI agents load directly. You change the rule, recompile, and only that prompt changes. Everything else stays untouched.*
+
+## Quick start
+
+```bash
+npx rulespec init --domain "customer support"
+
+npx rulespec add --id refund-policy \
+  --rule "Refunds allowed within 30 days for unused items" \
+  --context "Customer asks about returns" \
+  --intent enforce
+
+npx rulespec add --id escalation \
+  --rule "Escalate to human after 2 failed attempts" \
+  --context "Automated support cannot resolve" \
+  --intent enforce
+
+npx rulespec emit
+# → skills/customer-support/SKILL.md
+```
+
+No global install needed — `npx` downloads and runs it automatically.
+
+## Install as an agent skill
+
+```bash
+npx skills add pallaoro/rulespec
+```
+
+This installs the rulespec skill into your agent (Claude Code, Cursor, Codex, OpenClaw, etc.) so it knows how to use the CLI when you ask it to create or manage business rules.
 
 ## How it works
 
@@ -23,13 +53,10 @@ sources:
     schema:
       number: string
       vendor: string
-      line_items:
-        - description: string
-          quantity: number
-          unit_price: number
-          currency: string
+      amount: number
+      currency: string
 
-  - id: vendor-lookup
+  - id: erp-api
     type: api
     format: json
     description: "ERP vendor lookup"
@@ -53,18 +80,9 @@ rules:
 examples:
   - description: "Foreign currency invoice requiring approval"
     input:
-      invoice:
-        number: "INV-1001"
-        vendor: "Acme GmbH"
-        line_items:
-          - description: "Consulting Q1"
-            quantity: 1
-            unit_price: 7200
-            currency: "EUR"
+      invoice: { number: "INV-1001", vendor: "Acme GmbH", amount: 7200, currency: "EUR" }
     output:
       action: "require-approval"
-      vendor: "Acme GmbH"
-      converted: { amount: 7850, currency: "USD" }
       approver: "finance-mgr"
 
   - description: "Duplicate invoice rejection"
@@ -78,71 +96,97 @@ examples:
 
 ### Fields
 
-**Rules** have exactly four fields:
+**Rules** have four fields:
 
-- **`id`** — unique identifier. This is how you reference, update, and track a rule.
-- **`rule`** — the business rule in plain language. Written by a human who knows the domain. Sacred.
-- **`context`** — when this rule applies. Guides the compiler on scoping.
-- **`intent`** — `enforce`, `inform`, or `suggest`. Shapes how strict the compiled prompt is.
+| Field | Owner | Purpose |
+|-------|-------|---------|
+| `id` | Engineer | Unique identifier (kebab-case) |
+| `rule` | Business person | The business rule in plain language |
+| `context` | Shared | When this rule applies |
+| `intent` | Business person | `enforce`, `inform`, or `suggest` |
 
-**Sources** (optional) describe what data the rules operate on:
+**Intent** shapes the compiled output:
+- `enforce` — mandatory. Compiles to `**You must follow this rule.**`
+- `inform` — guidance. Neutral language.
+- `suggest` — recommendation. Compiles to `Consider the following:`
 
-- **`id`** — unique identifier for the source.
-- **`type`** — `document`, `api`, `database`, `message`, or `structured`.
-- **`format`** — file format or data format (e.g. `pdf`, `json`).
-- **`description`** — what this source is.
-- **`schema`** — shape of the data (optional, freeform YAML).
+**Sources** (optional) describe what data the rules operate on — type, format, schema.
 
-**Examples** (optional) are end-to-end test cases — input/output pairs that define correct behavior:
+**Examples** (optional) are input/output golden standards for evaluation. They exist at two levels:
+- **Global examples** — end-to-end test cases across all rules
+- **Per-rule examples** — scoped to a single rule
 
-- **`input`** — structured representation of the input data.
-- **`output`** — the expected result.
-- **`description`** — what this example tests.
+## CLI commands
 
-Examples serve two purposes: they're the acceptance tests for evaluation, and they document expected behavior for humans reading the spec.
-
-## Two outputs
-
-rulespec compiles to two formats:
-
-### 1. Compiled prompts (for injection into LLM calls)
-
+### Setup
 ```bash
-rulespec compile
+rulespec init --domain "invoice processing"
+rulespec set-domain "customer support"
 ```
 
-```markdown
-## Rules
-
-### Duplicate Check
-**You must follow this rule.** Before processing any invoice: Reject invoices with duplicate invoice numbers.
-
-### Approval Threshold
-**You must follow this rule.** After extraction, before posting: Invoices over $5000 require manager approval.
-
-### Greeting
-After processing decision: Address the submitter by first name in confirmation messages.
-```
-
-### 2. RULES.md (for AI agents)
-
+### Rules
 ```bash
-rulespec emit
+rulespec add --id <id> --rule <text> --context <text> --intent <enforce|inform|suggest>
+rulespec edit <id> [--rule <text>] [--context <text>] [--intent <type>]
+rulespec remove <id>
+rulespec list
 ```
 
-Generates a `rules/{domain}/RULES.md` file that agents load directly — like AGENT.md for identity or TOOLS.md for capabilities, RULES.md is for business policy:
+### Sources
+```bash
+rulespec add-source --id <id> --type <document|api|database|message|structured> --description <text> [--format <fmt>]
+rulespec remove-source <id>
+```
+
+### Examples
+```bash
+# Global examples
+rulespec add-example --input '{"amount": 100}' --output '{"action": "approve"}' --description "Small amount"
+rulespec add-example --input /path/to/input.json --output /path/to/expected.json
+rulespec add-example --input /path/to/invoice.pdf --output '{"vendor": "Acme", "total": 500}'
+rulespec remove-example <index>
+
+# Rule-specific examples
+rulespec add-rule-example <rule-id> --input '{"days": 5}' --output '{"refund": true}'
+rulespec add-rule-example <rule-id> --input /path/to/document.pdf --output '{"extracted": "data"}'
+rulespec remove-rule-example <rule-id> <index>
+```
+
+Input/output accepts three formats:
+- **Inline JSON** — `'{"key": "val"}'`
+- **JSON file** — `/path/to/data.json` (read and parsed)
+- **Any file** — `/path/to/doc.pdf` (stored as `{ file: "/path/to/doc.pdf" }`)
+
+### Find & replace
+```bash
+rulespec replace --old "30 days" --new "60 days"
+```
+Safe find-and-replace: validates the result and recompiles all prompts automatically.
+
+### Build & emit
+```bash
+rulespec compile [id]                  # Preview compiled prompts
+rulespec validate                      # Check file against schema
+rulespec emit                          # Generate skills/{domain}/SKILL.md
+rulespec emit --include-examples true  # Include examples in output
+rulespec emit --outdir <path>          # Custom output directory (default: skills)
+```
+
+All commands accept `--file <path>` (default: `rulespec.yaml`).
+
+## Output
+
+`rulespec emit` generates a SKILL.md in the skills directory:
 
 ```
-rules/
+skills/
   invoice-processing/
-    RULES.md
+    SKILL.md
   customer-support/
-    RULES.md
-  compliance/
-    RULES.md
+    SKILL.md
 ```
 
-Each RULES.md has YAML frontmatter for progressive disclosure (agents read name + description first, full rules only when relevant) and intent tags (`[enforce]`, `[inform]`, `[suggest]`) that tell the agent how strictly to treat each rule:
+The emitted SKILL.md uses YAML frontmatter for agent discovery and intent tags (`[enforce]`, `[inform]`, `[suggest]`) that tell the agent how strictly to follow each rule:
 
 ```markdown
 ---
@@ -152,12 +196,8 @@ type: rules
 schema: rulespec/v1
 ---
 
-## Sources
-
-| Source | Type | Format | Description |
-|--------|------|--------|-------------|
-| invoice | document | pdf | Incoming vendor invoice |
-| vendor-lookup | api | json | ERP vendor lookup |
+> **Do not edit this file directly.** It is generated by `rulespec emit` from `rulespec.yaml`.
+> To change rules, use the `rulespec` CLI and re-emit.
 
 ## Rules
 
@@ -171,112 +211,39 @@ schema: rulespec/v1
 After processing decision: Address the submitter by first name in confirmation messages.
 ```
 
-## The `rules/` directory convention
-
-Like `skills/` for SKILL.md, rules live in a `rules/` directory — one subdirectory per domain:
-
-```
-workspace/
-  AGENT.md              # identity (always loaded)
-  TOOLS.md              # available tools (always loaded)
-  rules/                # business rules
-    invoice-processing/
-      RULES.md          # agent-readable rules
-    customer-support/
-      RULES.md
-    compliance/
-      RULES.md
-  skills/               # capabilities (loaded on demand)
-    pdf-processing/
-      SKILL.md
-```
-
-### How agents load rules
-
-**RULES.md sits at the same level as AGENT.md and TOOLS.md** — it's always-active context, not conditionally loaded expertise. The key difference from SKILL.md:
-
-- **Skills** are loaded on demand when the agent decides they're relevant.
-- **Rules marked `[enforce]`** are always loaded. You don't conditionally load compliance rules.
-- **Rules marked `[inform]` or `[suggest]`** can be progressively loaded based on task relevance.
-
-### Keeping examples separate
-
-Examples contain real business data. They never go into RULES.md by default — they stay in the rulespec.yaml source file for local evaluation only:
-
-```
-rulespec.yaml            # source of truth (rules + sources + examples)
-rules/
-  invoice-processing/
-    RULES.md            # emitted for agent consumption (no examples)
-```
-
-To include examples in the emitted RULES.md (e.g. for demonstration purposes):
-
-```bash
-rulespec emit --include-examples true
-```
-
-## Quick start
-
-```bash
-# 1. Install
-npm install -g rulespec
-
-# 2. Initialize a rulespec file
-rulespec init
-
-# 3. Add rules
-rulespec add --id "refund-window" \
-  --rule "Refunds allowed within 30 days for unused items" \
-  --context "Customer asks about returns" \
-  --intent enforce
-
-# 4. Compile to prompts
-rulespec compile
-
-# 5. Emit RULES.md for agents
-rulespec emit
-```
-
-## CLI commands
-
-```
-rulespec init                        Create a rulespec.yaml in the current directory
-rulespec add                         Add a new rule
-rulespec remove <id>                 Remove a rule by id
-rulespec list                        List all rules
-rulespec compile [id]                Regenerate prompts and print markdown to stdout
-rulespec validate                    Validate the rulespec file
-rulespec emit                        Generate rules/{domain}/RULES.md for agents
-
-Options:
-  --file <path>                     Path to rulespec file (default: rulespec.yaml)
-  --outdir <path>                   Output directory for emit (default: rules)
-  --include-examples true           Include examples in emitted RULES.md
-```
-
 ## Design choices
 
-- **Format first, tooling second.** rulespec is a schema, not a framework. The YAML file is the product. The CLI is convenience. You could hand-edit the file and pipe it through anything.
-- **One rule, one change.** Editing a rule only affects that rule's compiled prompt. No cascading rewrites across your entire prompt. This makes iteration safe and diffs reviewable.
-- **Intent shapes output.** `enforce` produces strict, directive prompt language. `inform` produces softer guidance. `suggest` produces optional recommendations. Same rule, different prompt weight — controlled by one field.
-- **Business people own rules, engineers own strategy.** The compilation step is where prompt engineering lives. Rules are plain language. The two concerns never bleed into each other.
-- **Sources describe, examples prove.** Sources define what data the rules operate on. Examples define what correct looks like. Together they form a complete specification that can be evaluated automatically.
-- **Schema up, data stays down.** The rulespec spec (rules + source schemas) is safe to share with LLMs, vendors, auditors. Examples contain real data and stay local for evaluation. RULES.md excludes examples by default.
+- **Format first, tooling second.** The YAML file is the product. The CLI is convenience.
+- **One rule, one change.** Editing a rule only affects that rule's compiled prompt. No cascading rewrites.
+- **Intent shapes output.** Same rule, different prompt weight — controlled by one field.
+- **Business people own rules, engineers own strategy.** Rules are plain language. Compilation is where prompt engineering lives.
+- **Sources describe, examples prove.** Together they form a complete, evaluable specification.
+- **Schema up, data stays down.** The spec (rules + source schemas) is safe to share. Examples contain real data and are excluded from output by default.
 
 ## Why not just edit prompts directly?
 
-You can. Most people do. It works until:
+You can. It works until:
 
-- A policy changes and you update 3 of 7 places it appears in your prompt
+- A policy changes and you update 3 of 7 places it appears
 - Two teams edit the same system prompt and one overwrites the other
-- You can't tell which business rule a paragraph of prompt text corresponds to
+- You can't tell which rule a paragraph of prompt corresponds to
 - You want to A/B test one rule change without risking the rest
-- An auditor asks "where in our AI system is the refund policy enforced?"
-- You need to prove your AI agent follows business policy before going live
+- An auditor asks "where is the refund policy enforced in our AI?"
 
-rulespec makes business rules traceable, diffable, and independently versionable. `git blame` tells you who changed a rule and when. `rulespec diff` tells you exactly how the prompt changed. Examples let you verify the rules actually work.
+rulespec makes rules traceable, diffable, and independently versionable. `git blame` shows who changed a rule and when. Examples prove the rules work.
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Runtime** | Node.js, TypeScript |
+| **Format** | YAML (rulespec/v1 schema) |
+| **Output** | Markdown (SKILL.md with YAML frontmatter) |
+| **Dependencies** | `yaml` (single runtime dep) |
+| **AI generation** | Optional — AI SDK peer dep for LLM-assisted prompt compilation |
 
 ## License
 
 MIT
+
+Built by the team behind [Clawnify](https://www.clawnify.com).
