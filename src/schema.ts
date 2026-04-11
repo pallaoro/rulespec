@@ -18,7 +18,7 @@ export interface Source {
 export interface Example {
   input: Record<string, unknown>;
   output: Record<string, unknown>;
-  description?: string;
+  note?: string;
 }
 
 export interface Rule {
@@ -189,9 +189,9 @@ export function validate(data: unknown): ValidationResult {
           });
         }
 
-        if (e.description !== undefined && typeof e.description !== "string") {
+        if (e.note !== undefined && typeof e.note !== "string") {
           errors.push({
-            path: `${prefix}.description`,
+            path: `${prefix}.note`,
             message: "Expected a string",
           });
         }

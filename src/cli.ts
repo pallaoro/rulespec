@@ -74,7 +74,7 @@ Source options (add-source):
 Example options (add-example):
   --input <json>          Input data as JSON string
   --output <json>         Expected output as JSON string
-  --description <text>    What this example tests (optional)
+  --note <text>           Context or comment for the example (optional)
 
 Emit options:
   --outdir <path>         Output directory (default: skills)

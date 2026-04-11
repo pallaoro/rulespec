@@ -47,7 +47,7 @@ rules:
     prompt: "### Greeting\nAfter processing decision: Address the submitter by first name in confirmation messages."
 
 examples:
-  - description: "Foreign currency invoice requiring approval"
+  - note: "Foreign currency invoice requiring approval"
     input:
       invoice:
         number: "INV-1001"
@@ -68,7 +68,7 @@ examples:
       flags:
         - "foreign-currency"
 
-  - description: "Duplicate invoice rejection"
+  - note: "Duplicate invoice rejection"
     input:
       invoice:
         number: "INV-0999"
@@ -85,7 +85,7 @@ examples:
       action: "reject"
       reason: "duplicate"
 
-  - description: "Small USD invoice auto-approved"
+  - note: "Small USD invoice auto-approved"
     input:
       invoice:
         number: "INV-1050"

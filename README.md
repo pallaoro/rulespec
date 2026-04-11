@@ -87,14 +87,14 @@ rules:
     intent: inform
 
 examples:
-  - description: "Foreign currency invoice requiring approval"
+  - note: "Foreign currency invoice requiring approval"
     input:
       invoice: { number: "INV-1001", vendor: "Acme GmbH", amount: 7200, currency: "EUR" }
     output:
       action: "require-approval"
       approver: "finance-mgr"
 
-  - description: "Duplicate invoice rejection"
+  - note: "Duplicate invoice rejection"
     input:
       invoice: { number: "INV-0999", vendor: "Local Supply" }
       existing_invoices: ["INV-0999"]
@@ -102,7 +102,7 @@ examples:
       action: "reject"
       reason: "duplicate"
 
-  - description: "PDF invoice extraction"
+  - note: "PDF invoice extraction"
     input:
       file: "./samples/invoice-1003.pdf"
     output:
@@ -158,7 +158,7 @@ rulespec remove-source <id>
 ### Examples
 ```bash
 # Global examples
-rulespec add-example --input '{"amount": 100}' --output '{"action": "approve"}' --description "Small amount"
+rulespec add-example --input '{"amount": 100}' --output '{"action": "approve"}' --note "Small amount"
 rulespec add-example --input /path/to/input.json --output /path/to/expected.json
 rulespec add-example --input /path/to/invoice.pdf --output '{"vendor": "Acme", "total": 500}'
 rulespec remove-example <index>

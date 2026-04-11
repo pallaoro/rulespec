@@ -145,7 +145,7 @@ describe("emitRulesMd", () => {
       makeFile({
         examples: [
           {
-            description: "Simple approval",
+            note: "Simple approval",
             input: { invoice: { number: "INV-1" } },
             output: { action: "approve" },
           },

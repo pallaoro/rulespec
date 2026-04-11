@@ -100,8 +100,8 @@ export function emitRulesMd(
     parts.push("");
     for (let i = 0; i < file.examples.length; i++) {
       const ex = file.examples[i];
-      if (ex.description) {
-        parts.push(`### Example ${i + 1}: ${ex.description}`);
+      if (ex.note) {
+        parts.push(`### Example ${i + 1}: ${ex.note}`);
       } else {
         parts.push(`### Example ${i + 1}`);
       }

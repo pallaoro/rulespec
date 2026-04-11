@@ -46,9 +46,9 @@ rulespec remove-source <id>
 
 ### Global examples (end-to-end input/output pairs)
 ```bash
-rulespec add-example --input '{"key": "val"}' --output '{"key": "val"}' [--description <text>]
-rulespec add-example --input /path/to/input.json --output /path/to/output.json --description "From files"
-rulespec add-example --input /path/to/invoice.pdf --output '{"action": "approve"}' --description "PDF input"
+rulespec add-example --input '{"key": "val"}' --output '{"key": "val"}' [--note <text>]
+rulespec add-example --input /path/to/input.json --output /path/to/output.json --note "From files"
+rulespec add-example --input /path/to/invoice.pdf --output '{"action": "approve"}' --note "PDF input"
 rulespec remove-example <index>                # 0-based index
 ```
 
@@ -103,7 +103,7 @@ rules:
     intent: enforce | inform | suggest
 
 examples:                             # optional — end-to-end golden standards
-  - description: "What this example tests"
+  - note: "What this example tests"
     input: { ... }
     output: { ... }
 ```

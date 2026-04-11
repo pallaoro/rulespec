@@ -103,12 +103,12 @@ describe("validate global examples", () => {
     expect(result.ok).toBe(true);
   });
 
-  it("accepts examples with description", () => {
+  it("accepts examples with note", () => {
     const result = validate({
       ...validBase,
       examples: [
         {
-          description: "Simple case",
+          note: "Simple case",
           input: { x: 1 },
           output: { y: 2 },
         },
