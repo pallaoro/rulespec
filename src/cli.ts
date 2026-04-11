@@ -28,6 +28,27 @@ function parseFlags(args: string[]): Record<string, string> {
   return flags;
 }
 
+import { readdirSync, existsSync } from "node:fs";
+
+function resolveDefaultFile(): string {
+  // Legacy fallback
+  if (existsSync("rulespec.yaml")) return "rulespec.yaml";
+  // Scan for *.rulespec.yaml
+  try {
+    const files = readdirSync(".").filter((f) =>
+      f.endsWith(".rulespec.yaml"),
+    );
+    if (files.length === 1) return files[0];
+    if (files.length > 1) {
+      console.error(
+        `Multiple rulespec files found: ${files.join(", ")}\nUse --file to specify which one.`,
+      );
+      process.exit(1);
+    }
+  } catch {}
+  return "rulespec.yaml"; // will fail with helpful "file not found" later
+}
+
 function printHelp(): void {
   console.log(`rulespec — business rules as structured data
 
@@ -35,7 +56,7 @@ Usage:
   rulespec <command> [options]
 
 Commands:
-  init                    Create a rulespec.yaml in the current directory
+  init                    Create a {domain}.rulespec.yaml file (--domain required)
   set-domain <domain>     Set the domain name
   add                     Add a new rule
   edit <id>               Modify an existing rule
@@ -50,14 +71,14 @@ Commands:
   compile [id]            Regenerate prompts and print markdown to stdout
   validate                Validate the rulespec file
   replace                 Find and replace text in rulespec.yaml (validates + recompiles)
-  emit                    Generate skills/{domain}/SKILL.md for agents
+  emit                    Emit all *.rulespec.yaml to skills/{domain}/SKILL.md
 
 Options:
-  --file <path>           Path to rulespec file (default: rulespec.yaml)
+  --file <path>           Path to rulespec file (auto-detected from *.rulespec.yaml)
   --help                  Show this help message
 
 Init options:
-  --domain <name>         Set the domain name (default: "your domain here")
+  --domain <name>         Domain name (required, used as filename)
 
 Rule options (add / edit):
   --id <id>               Rule id (kebab-case, required for add)
@@ -96,7 +117,8 @@ async function main(): Promise<void> {
 
   const rest = args.slice(1);
   const flags = parseFlags(rest);
-  const file = flags.file ?? "rulespec.yaml";
+  const noAutoResolve = command === "init" || command === "emit";
+  const file = flags.file ?? (noAutoResolve ? "rulespec.yaml" : resolveDefaultFile());
 
   switch (command) {
     case "init":

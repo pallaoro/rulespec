@@ -1,6 +1,6 @@
 {
   "name": "rulespec",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Business rules as structured data, compiled into LLM-ready markdown prompts",
   "type": "module",
   "main": "./dist/index.js",
