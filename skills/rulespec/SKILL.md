@@ -40,10 +40,16 @@ rulespec add-source --id <id> --type <document|api|database|message|structured> 
 rulespec remove-source <id>
 ```
 
-### Examples
+### Global examples
 ```bash
 rulespec add-example --input '{"key": "val"}' --output '{"key": "val"}' [--description <text>]
 rulespec remove-example <index>                # 0-based index
+```
+
+### Rule-specific examples
+```bash
+rulespec add-rule-example <rule-id> --input '{"key": "val"}' --output '{"key": "val"}'
+rulespec remove-rule-example <rule-id> <index> # 0-based index
 ```
 
 ### Find & replace

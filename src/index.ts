@@ -16,6 +16,8 @@ export {
   removeExample,
   setDomain,
   replaceInFile,
+  addRuleExample,
+  removeRuleExample,
 } from "./writer.js";
 
 import { parseRulespecFile } from "./parser.js";

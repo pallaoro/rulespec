@@ -14,6 +14,8 @@ import { removeSourceCmd } from "./commands/remove-source.js";
 import { addExampleCmd } from "./commands/add-example.js";
 import { removeExampleCmd } from "./commands/remove-example.js";
 import { replaceCmd } from "./commands/replace.js";
+import { addRuleExampleCmd } from "./commands/add-rule-example.js";
+import { removeRuleExampleCmd } from "./commands/remove-rule-example.js";
 
 function parseFlags(args: string[]): Record<string, string> {
   const flags: Record<string, string> = {};
@@ -43,6 +45,8 @@ Commands:
   remove-source <id>      Remove a data source by id
   add-example             Add a global input/output example
   remove-example <index>  Remove an example by index (0-based)
+  add-rule-example <id>   Add an example to a specific rule
+  remove-rule-example <id> <index>  Remove an example from a rule
   compile [id]            Regenerate prompts and print markdown to stdout
   validate                Validate the rulespec file
   replace                 Find and replace text in rulespec.yaml (validates + recompiles)
@@ -145,6 +149,27 @@ async function main(): Promise<void> {
       }
       await removeExampleCmd(file, rest[0]);
       break;
+    case "add-rule-example":
+      if (!rest[0] || rest[0].startsWith("--")) {
+        console.error(
+          'Usage: rulespec add-rule-example <rule-id> --input \'{"key":"val"}\' --output \'{"key":"val"}\'',
+        );
+        process.exit(1);
+      }
+      await addRuleExampleCmd(file, rest[0], flags);
+      break;
+    case "remove-rule-example": {
+      const ruleId = rest[0];
+      const exIdx = rest[1];
+      if (!ruleId || ruleId.startsWith("--") || !exIdx) {
+        console.error(
+          "Usage: rulespec remove-rule-example <rule-id> <index>",
+        );
+        process.exit(1);
+      }
+      await removeRuleExampleCmd(file, ruleId, exIdx);
+      break;
+    }
     case "replace":
       await replaceCmd(file, flags);
       break;

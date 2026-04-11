@@ -1,15 +1,16 @@
-import { addExample } from "../writer.js";
+import { addRuleExample } from "../writer.js";
 import { resolveInput } from "../resolve-input.js";
 
-export async function addExampleCmd(
+export async function addRuleExampleCmd(
   file: string,
+  id: string,
   flags: Record<string, string>,
 ): Promise<void> {
-  const { input, output, description } = flags;
+  const { input, output } = flags;
 
   if (!input || !output) {
     console.error(
-      "Usage: rulespec add-example --input <json|file> --output <json|file> [--description <text>]",
+      "Usage: rulespec add-rule-example <rule-id> --input <json|file> --output <json|file>",
     );
     process.exit(1);
   }
@@ -17,13 +18,10 @@ export async function addExampleCmd(
   const parsedInput = await resolveInput(input, "--input");
   const parsedOutput = await resolveInput(output, "--output");
 
-  await addExample(file, {
+  await addRuleExample(file, id, {
     input: parsedInput,
     output: parsedOutput,
-    description: description || undefined,
   });
 
-  console.log(
-    `Added example${description ? `: "${description}"` : ""}`,
-  );
+  console.log(`Added example to rule "${id}"`);
 }

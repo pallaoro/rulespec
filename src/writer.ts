@@ -119,6 +119,51 @@ export async function removeRule(path: string, id: string): Promise<void> {
   await writeFile(path, stringify(file), "utf-8");
 }
 
+// --- Rule examples ---
+
+export async function addRuleExample(
+  path: string,
+  ruleId: string,
+  example: Example,
+): Promise<void> {
+  const file = await readAndValidate(path);
+
+  const rule = file.rules.find((r) => r.id === ruleId);
+  if (!rule) {
+    throw new Error(`Rule with id "${ruleId}" not found`);
+  }
+
+  if (!rule.examples) rule.examples = [];
+  rule.examples.push(example);
+  await writeFile(path, stringify(file), "utf-8");
+}
+
+export async function removeRuleExample(
+  path: string,
+  ruleId: string,
+  index: number,
+): Promise<void> {
+  const file = await readAndValidate(path);
+
+  const rule = file.rules.find((r) => r.id === ruleId);
+  if (!rule) {
+    throw new Error(`Rule with id "${ruleId}" not found`);
+  }
+
+  if (!rule.examples || index < 0 || index >= rule.examples.length) {
+    throw new Error(
+      `Example at index ${index} not found on rule "${ruleId}"`,
+    );
+  }
+
+  rule.examples.splice(index, 1);
+  if (rule.examples.length === 0) {
+    delete rule.examples;
+  }
+
+  await writeFile(path, stringify(file), "utf-8");
+}
+
 // --- Sources ---
 
 export async function addSource(path: string, source: Source): Promise<void> {
