@@ -40,17 +40,27 @@ rulespec add-source --id <id> --type <document|api|database|message|structured> 
 rulespec remove-source <id>
 ```
 
-### Global examples
+### Global examples (end-to-end input/output pairs)
 ```bash
 rulespec add-example --input '{"key": "val"}' --output '{"key": "val"}' [--description <text>]
+rulespec add-example --input /path/to/input.json --output /path/to/output.json --description "From files"
+rulespec add-example --input /path/to/invoice.pdf --output '{"action": "approve"}' --description "PDF input"
 rulespec remove-example <index>                # 0-based index
 ```
 
 ### Rule-specific examples
 ```bash
-rulespec add-rule-example <rule-id> --input '{"key": "val"}' --output '{"key": "val"}'
+rulespec add-rule-example <rule-id> --input '{"amount": 100}' --output '{"approved": true}'
+rulespec add-rule-example <rule-id> --input /path/to/file.pdf --output '{"extracted": "data"}'
 rulespec remove-rule-example <rule-id> <index> # 0-based index
 ```
+
+### Input/output resolution
+
+Both `--input` and `--output` accept three formats:
+- **Inline JSON**: `'{"key": "val"}'` — parsed directly
+- **JSON file path**: `/path/to/data.json` — file is read and parsed
+- **Any other file path**: `/path/to/doc.pdf` — stored as `{ file: "/path/to/doc.pdf" }`
 
 ### Find & replace
 ```bash
