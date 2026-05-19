@@ -1,6 +1,6 @@
 {
   "name": "rulespec",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Business rules as structured data, compiled into LLM-ready markdown prompts",
   "type": "module",
   "main": "./dist/index.js",
@@ -15,13 +15,27 @@
     "rulespec": "./dist/cli.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "skills/**/*",
+    "openclaw.plugin.json"
   ],
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
     "prepublishOnly": "npm run build && npm test"
+  },
+  "openclaw": {
+    "extensions": [
+      "./dist/index.js"
+    ],
+    "compat": {
+      "pluginApi": ">=2026.5.2",
+      "minGatewayVersion": ">=2026.5.2"
+    },
+    "build": {
+      "openclawVersion": "2026.5.12"
+    }
   },
   "keywords": [
     "business-rules",
