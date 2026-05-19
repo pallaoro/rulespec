@@ -1,12 +1,50 @@
 {
   "id": "rulespec",
   "name": "rulespec",
-  "description": "Business rules as structured YAML data, compiled into LLM-ready SKILL.md prompts.",
-  "version": "0.9.0",
+  "description": "Business rules as structured YAML data, compiled into LLM-ready SKILL.md prompts. Native tools for the full lifecycle (init, list, add/edit/remove rule, sources, examples, compile, validate, emit, replace).",
+  "version": "0.10.0",
   "skills": ["./skills/rulespec"],
+  "contracts": {
+    "tools": [
+      "rulespec_init",
+      "rulespec_set_domain",
+      "rulespec_list",
+      "rulespec_add_rule",
+      "rulespec_edit_rule",
+      "rulespec_remove_rule",
+      "rulespec_add_source",
+      "rulespec_remove_source",
+      "rulespec_add_example",
+      "rulespec_remove_example",
+      "rulespec_add_rule_example",
+      "rulespec_remove_rule_example",
+      "rulespec_compile",
+      "rulespec_validate",
+      "rulespec_emit",
+      "rulespec_replace"
+    ]
+  },
   "configSchema": {
     "type": "object",
     "additionalProperties": false,
-    "properties": {}
+    "properties": {
+      "approval": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Approval gate for `rulespec_emit` (the only write that publishes a SKILL.md agents follow). Other writes run silently.",
+        "properties": {
+          "enabled": { "type": "boolean" },
+          "skipSessionPatterns": { "type": "array", "items": { "type": "string" } },
+          "timeoutMs": { "type": "number" },
+          "timeoutBehavior": { "type": "string", "enum": ["allow", "deny"] }
+        }
+      }
+    }
+  },
+  "uiHints": {
+    "approval": {
+      "label": "Emit approval gate",
+      "help": "Prompt before `rulespec_emit` runs. Set enabled=false to disable, or add session-key substrings to skipSessionPatterns for unattended automation."
+    }
   }
 }
