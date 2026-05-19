@@ -2,8 +2,8 @@
   "id": "rulespec",
   "name": "rulespec",
   "description": "Business rules as structured YAML data, compiled into LLM-ready SKILL.md prompts. Native tools for the full lifecycle (init, list, add/edit/remove rule, sources, examples, compile, validate, emit, replace).",
-  "version": "0.10.0",
-  "skills": ["./skills/rulespec"],
+  "version": "0.10.1",
+  "skills": ["./skills/rulespec-plugin"],
   "contracts": {
     "tools": [
       "rulespec_init",
