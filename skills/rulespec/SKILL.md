@@ -12,6 +12,8 @@ description: >
 
 **Manage business rules for AI agents without breaking what already works.**
 
+> **Note for OpenClaw users:** if rulespec is installed as an OpenClaw plugin (`openclaw plugins install rulespec`), prefer the **native tools** (`rulespec_init`, `rulespec_add_rule`, `rulespec_emit`, …) over the CLI — they run in-process with structured params. The plugin variant of this skill at `~/.openclaw/plugin-skills/rulespec/SKILL.md` documents them. The CLI docs below apply to every other context (standalone npm, Claude Code, Cursor, Codex, etc.).
+
 Adding a rule to a system prompt shouldn't risk invalidating the ones that are already there. Inline prompt editing doesn't scale — and other solutions aren't built for business rules.
 
 rulespec treats each rule as an independent, validated unit. Add, edit, or remove one rule via CLI — the rest stay untouched. The output is a structured SKILL.md that any AI agent can load.
