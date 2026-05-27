@@ -73,7 +73,7 @@ interface BeforeToolCallEvent {
 interface ToolDef {
   name: string;
   description: string;
-  inputSchema: Record<string, unknown>;
+  parameters: Record<string, unknown>;
   execute: (params: Record<string, unknown>) => Promise<unknown>;
 }
 
@@ -217,7 +217,7 @@ function register(api: PluginApi): void {
     name: "rulespec_init",
     description:
       "Create a new rulespec.yaml. Defaults to skills/<slug>/rulespec.yaml; pass `agent` to target a specific agent's skills dir (claude-code, cursor, openclaw, codex, opencode), or `global: true` (with `agent`) to use the agent's global skills dir.",
-    inputSchema: {
+    parameters: {
       type: "object",
       additionalProperties: false,
       required: ["domain"],
@@ -266,7 +266,7 @@ function register(api: PluginApi): void {
   api.registerTool({
     name: "rulespec_set_domain",
     description: "Change the domain of an existing rulespec.yaml.",
-    inputSchema: {
+    parameters: {
       type: "object",
       additionalProperties: false,
       required: ["domain"],
@@ -288,7 +288,7 @@ function register(api: PluginApi): void {
   api.registerTool({
     name: "rulespec_list",
     description: "Read a rulespec.yaml and return its domain, rules, sources, and examples.",
-    inputSchema: {
+    parameters: {
       type: "object",
       additionalProperties: false,
       properties: { path: { type: "string" } },
@@ -313,7 +313,7 @@ function register(api: PluginApi): void {
   api.registerTool({
     name: "rulespec_add_rule",
     description: "Append a new rule. The rule's `prompt` field is auto-compiled from `rule` + `context` + `intent`.",
-    inputSchema: {
+    parameters: {
       type: "object",
       additionalProperties: false,
       required: ["id", "rule", "context", "intent"],
@@ -342,7 +342,7 @@ function register(api: PluginApi): void {
   api.registerTool({
     name: "rulespec_edit_rule",
     description: "Update one or more fields of an existing rule. Recompiles `prompt`.",
-    inputSchema: {
+    parameters: {
       type: "object",
       additionalProperties: false,
       required: ["id"],
@@ -367,7 +367,7 @@ function register(api: PluginApi): void {
   api.registerTool({
     name: "rulespec_remove_rule",
     description: "Remove a rule by id. Fails if it would leave zero rules.",
-    inputSchema: {
+    parameters: {
       type: "object",
       additionalProperties: false,
       required: ["id"],
@@ -387,7 +387,7 @@ function register(api: PluginApi): void {
   api.registerTool({
     name: "rulespec_add_source",
     description: "Add an input data source (document / api / database / message / structured).",
-    inputSchema: {
+    parameters: {
       type: "object",
       additionalProperties: false,
       required: ["id", "type", "description"],
@@ -417,7 +417,7 @@ function register(api: PluginApi): void {
   api.registerTool({
     name: "rulespec_remove_source",
     description: "Remove a source by id.",
-    inputSchema: {
+    parameters: {
       type: "object",
       additionalProperties: false,
       required: ["id"],
@@ -437,7 +437,7 @@ function register(api: PluginApi): void {
   api.registerTool({
     name: "rulespec_add_example",
     description: "Append a global end-to-end input/output example.",
-    inputSchema: {
+    parameters: {
       type: "object",
       additionalProperties: false,
       required: ["input", "output"],
@@ -462,7 +462,7 @@ function register(api: PluginApi): void {
   api.registerTool({
     name: "rulespec_remove_example",
     description: "Remove a global example by zero-based index.",
-    inputSchema: {
+    parameters: {
       type: "object",
       additionalProperties: false,
       required: ["index"],
@@ -480,7 +480,7 @@ function register(api: PluginApi): void {
   api.registerTool({
     name: "rulespec_add_rule_example",
     description: "Append a per-rule input/output example.",
-    inputSchema: {
+    parameters: {
       type: "object",
       additionalProperties: false,
       required: ["rule_id", "input", "output"],
@@ -506,7 +506,7 @@ function register(api: PluginApi): void {
   api.registerTool({
     name: "rulespec_remove_rule_example",
     description: "Remove a per-rule example by zero-based index.",
-    inputSchema: {
+    parameters: {
       type: "object",
       additionalProperties: false,
       required: ["rule_id", "index"],
@@ -531,7 +531,7 @@ function register(api: PluginApi): void {
   api.registerTool({
     name: "rulespec_compile",
     description: "Compile one rule (when `rule_id` given) or all rules and return the markdown prompt(s). Does not write to disk.",
-    inputSchema: {
+    parameters: {
       type: "object",
       additionalProperties: false,
       properties: {
@@ -553,7 +553,7 @@ function register(api: PluginApi): void {
   api.registerTool({
     name: "rulespec_validate",
     description: "Validate a rulespec.yaml against the schema. Returns `{ valid: true }` on success or `{ valid: false, errors: [...] }` on failure.",
-    inputSchema: {
+    parameters: {
       type: "object",
       additionalProperties: false,
       properties: { path: { type: "string" } },
@@ -572,7 +572,7 @@ function register(api: PluginApi): void {
   api.registerTool({
     name: "rulespec_emit",
     description: "Compile a rulespec.yaml and write the resulting SKILL.md alongside it (or to an override directory). When neither `path` nor `outdir` is given, every discovered rulespec.yaml under known skills directories is emitted.",
-    inputSchema: {
+    parameters: {
       type: "object",
       additionalProperties: false,
       properties: {
@@ -628,7 +628,7 @@ function register(api: PluginApi): void {
   api.registerTool({
     name: "rulespec_replace",
     description: "Find-and-replace one occurrence of `old` with `new` in a rulespec.yaml. Validates the result and recompiles all rule prompts.",
-    inputSchema: {
+    parameters: {
       type: "object",
       additionalProperties: false,
       required: ["old", "new"],
